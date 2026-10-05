@@ -1,0 +1,129 @@
+image: omemo-dr:latest
+
+stages:
+  - test
+  - build
+  - deploy
+  - publish
+
+test-codespell:
+  stage: test
+  script:
+    - pip install codespell[toml]==2.2.4
+    - codespell .
+  interruptible: true
+
+test-pyright:
+  stage: test
+  rules:
+    - changes:
+      - "**/*.py"
+  script:
+    - pip install .
+    - npm install pyright@1.1.389
+    - node_modules/.bin/pyright --version
+    - node_modules/.bin/pyright
+  interruptible: true
+
+test-unittest:
+  stage: test
+  rules:
+    - changes:
+      - "**/*.py"
+  script:
+    - pip install .
+    - python -m unittest discover -v
+  interruptible: true
+
+test-ruff:
+  stage: test
+  rules:
+    - changes:
+      - "**/*.py"
+  script:
+    - pip3 install ruff==0.5.4
+    - ruff check .
+  interruptible: true
+
+test-isort:
+  stage: test
+  rules:
+    - changes:
+      - "**/*.py"
+  script:
+    - pip3 install isort==5.12.0
+    - isort --check .
+  interruptible: true
+
+test-black:
+  stage: test
+  rules:
+    - changes:
+      - "**/*.py"
+  script:
+    - pip3 install black==23.1.0
+    - black --check .
+  interruptible: true
+
+build-unix:
+  image: omemo-dr-build:latest
+  stage: build
+  dependencies: []
+  script:
+    - python3 -m build
+    - release-helper build-debian-pkg --pkgprefix=python3 "$(find dist/omemo_dr-*.tar.gz)" 1
+
+  artifacts:
+    name: "omemo-dr-$CI_COMMIT_SHA"
+    expire_in: 1 week
+    paths:
+      - dist/omemo_dr-*.tar.gz
+      - debian_build/*
+
+deploy-pypi:
+  image: omemo-dr-deploy:latest
+  stage: deploy
+  dependencies:
+    - build-unix
+  rules:
+    - if: '$CI_COMMIT_TAG'
+  script:
+    - twine upload --username=__token__ --password=$PYPI_TOKEN dist/*
+
+deploy-debian-nightly:
+  image: omemo-dr-deploy:latest
+  stage: deploy
+  dependencies:
+    - build-unix
+  rules:
+    - if: '$NIGHTLY_BUILD'
+  allow_failure:
+    exit_codes:
+      - 100
+  script:
+    - |
+      if [ "$FORCE_DEB_DEPLOY" != "true" ]
+      then
+        release-helper nightly-check
+      fi
+    - >
+      release-helper deploy-to-ftp \
+        --host=$FTP_HOST \
+        --user=$FTP_USER \
+        --password=$FTP_PASS \
+        --directory=debian/omemo-dr/"$(date +'%Y%m%d')" \
+        debian_build
+
+publish-release:
+  image: omemo-dr-publish:latest
+  stage: publish
+  dependencies: []
+  rules:
+    - if: '$CI_COMMIT_TAG'
+  script:
+    - >
+      release-helper create-release \
+        $CI_PROJECT_ID \
+        $CI_RELEASE_TOKEN \
+        --version=${CI_COMMIT_TAG:1} \
+        --tag=${CI_COMMIT_TAG}

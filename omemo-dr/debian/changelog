@@ -1,0 +1,5 @@
+python3-omemo-dr ({DATE}) unstable; urgency=low
+
+  * https://dev.gajim.org/gajim/omemo-dr/-/commits/master
+
+ -- omemo-dr CI <ci@gajim.org>  {DATE_TIME}

@@ -1,0 +1,2 @@
+recursive-include curve25519 *.h
+recursive-include tests *.py

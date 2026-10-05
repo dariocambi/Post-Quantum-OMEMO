@@ -1,0 +1,11 @@
+#!/usr/bin/make -f
+
+DPKG_EXPORT_BUILDFLAGS = 1
+include /usr/share/dpkg/default.mk
+
+export PYBUILD_NAME=omemo-dr
+export PYBUILD_INTERPRETERS=python3.14
+export PYBUILD_VERSIONS=3.14
+
+%:
+	dh $@ --with python3 --buildsystem=pybuild

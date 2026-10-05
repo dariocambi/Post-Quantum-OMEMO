@@ -1,0 +1,64 @@
+# =========================
+# File di Sistema (macOS)
+# =========================
+.DS_Store
+.AppleDouble
+.LSOverride
+__MACOSX/
+._*
+
+# =========================
+# Python
+# =========================
+# Cache e bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+
+# =========================
+# Binari e Compilazione C
+# =========================
+*.so
+*.o
+*.obj
+*.a
+*.dll
+*.dylib
+
+# =========================
+# Build, Distribuzione e Packaging
+# =========================
+build/
+dist/
+*.egg-info/
+.eggs/
+*.egg
+.installed.cfg
+MANIFEST
+
+# =========================
+# Test e Coverage
+# =========================
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+nosetests.xml
+coverage.xml
+
+# =========================
+# Ambienti Virtuali Python
+# =========================
+venv/
+.venv/
+env/
+.env/
+Pipfile.lock
+
+# =========================
+# IDE e Tool Locali (Opzionale)
+# =========================
+.vscode/
+.idea/
+*.swp
+*.swo
